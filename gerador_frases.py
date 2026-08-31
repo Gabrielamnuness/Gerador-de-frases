@@ -3,7 +3,7 @@ import requests
 from deep_translator import GoogleTranslator
 import urllib.parse
 
-# 1. Configuração da página e injeção do visual CSS (Sem ícones)
+# 1. Configuração da página e injeção do visual CSS definitivo (Centralizado e Sem Ícones)
 st.set_page_config(page_title="Frase do dia", layout="centered")
 
 st.html("""
@@ -70,7 +70,7 @@ st.html("""
             width: 100% !important;
         }
 
-        [data-testid="stButton"], [data-testid="stLinkButton"] {
+        [data-testid="stButton"] {
             display: flex !important;
             justify-content: center !important;
             align-items: center !important;
@@ -78,8 +78,8 @@ st.html("""
             margin: 0 auto !important;
         }
         
-        /* Estilização dos botões limpos (Vermelho e Verde) */
-        .stButton > button, .stLinkButton > a {
+        /* Estilização dos dois botões (Vermelho e Verde) para ficarem idênticos */
+        .stButton > button {
             border: none !important;
             padding: 12px 24px !important;
             font-size: 1rem !important;
@@ -92,27 +92,27 @@ st.html("""
             justify-content: center !important;
             align-items: center !important;
             text-align: center !important;
-            text-decoration: none !important;
         }
         
-        /* Botão "Nova Frase" (Vermelho) */
-        .stButton > button {
+        /* Botão 1: "Nova Frase" (Vermelho) */
+        .stButton:nth-of-type(1) > button {
             background-color: #ff4757 !important;
             color: white !important;
         }
-        .stButton > button:hover {
+        .stButton:nth-of-type(1) > button:hover {
             background-color: #e84118 !important;
         }
         
-        /* Botão "Compartilhar" (Verde do WhatsApp) */
-        .stLinkButton > a {
+        /* Botão 2: "Compartilhar no WhatsApp" (Verde) */
+        .stButton:nth-of-type(2) > button {
             background-color: #25D366 !important;
             color: white !important;
         }
-        .stLinkButton > a:hover {
+        .stButton:nth-of-type(2) > button:hover {
             background-color: #128C7E !important;
         }
         
+        /* Oculta os cabeçalhos e menus nativos do Streamlit */
         header, footer, [data-testid="stHeader"] { visibility: hidden !important; }
     </style>
 """)
@@ -121,7 +121,7 @@ st.html("""
 def buscar_frase_da_internet():
     try:
         # Puxa uma frase totalmente aleatória da API global do DummyJSON
-        resposta = requests.get("https://dummyjson.com/quotes/random", timeout=5)
+        resposta = requests.get("https://dummyjson.com", timeout=5)
         if resposta.status_code == 200:
             dados = resposta.json()
             frase_ingles = dados["quote"]
@@ -134,6 +134,7 @@ def buscar_frase_da_internet():
         pass
     return "A persistência é o caminho do êxito.", "Charles Chaplin"
 
+# 3. Construção dos elementos visuais na tela
 st.markdown('<p class="titulo-principal">Para Lembrar</p>', unsafe_allow_html=True)
 
 # Faz a chamada da API em tempo real a cada carregamento
@@ -142,32 +143,18 @@ frase_gerada, autor_original = buscar_frase_da_internet()
 st.markdown(f'<p class="texto-dinamico">"{frase_gerada}"</p>', unsafe_allow_html=True)
 st.markdown(f'<p class="texto-autor">- {autor_original}</p>', unsafe_allow_html=True)
 
-# Botão de Nova Frase limpo (Apenas recarrega o script para buscar outra frase na internet)
+# Botão Vermelho: Nova Frase (Apenas recarrega a página para puxar outra frase na internet)
 if st.button("Nova Frase"):
     st.rerun()
 
-# Configuração da mensagem de compartilhamento (Deixe exatamente como está)
+# Configuração automática da mensagem que o WhatsApp vai ler
 mensagem_formatada = f"*Para Lembrar:*\n\n\"{frase_gerada}\"\n- {autor_original}"
 link_whatsapp = f"https://whatsapp.com{urllib.parse.quote(mensagem_formatada)}"
 
-# ESTA É A LINHA QUE CORRIGE O BLOQUEIO (Muda target para _self):
-st.markdown(
-    f'<a href="{link_whatsapp}" target="_self" style="'
-    f'background-color: #25D366; '
-    f'color: white; '
-    f'border: none; '
-    f'padding: 12px 24px; '
-    f'font-size: 1rem; '
-    f'border-radius: 6px; '
-    f'font-weight: bold; '
-    f'transition: 0.3s; '
-    f'width: 280px; '
-    f'margin: 5px auto; '
-    f'display: inline-flex; '
-    f'justify-content: center; '
-    f'align-items: center; '
-    f'text-align: center; '
-    f'text-decoration: none;'
-    f'">Compartilhar no WhatsApp</a>', 
-    unsafe_allow_html=True
-)
+# Botão Verde: Compartilhar no WhatsApp (Usa Javascript para forçar o navegador a abrir sem dar bloqueio)
+if st.button("Compartilhar no WhatsApp"):
+    st.html(f"""
+        <script type="text/javascript">
+            window.top.location.href = "{link_whatsapp}";
+        </script>
+    """)
