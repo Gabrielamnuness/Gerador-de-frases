@@ -2,8 +2,8 @@ import streamlit as st
 import requests
 from deep_translator import GoogleTranslator
 import urllib.parse
-import random
 
+# 1. Configuração da página e injeção do visual CSS (Sem ícones)
 st.set_page_config(page_title="Frase do dia", layout="centered")
 
 st.html("""
@@ -54,7 +54,7 @@ st.html("""
             margin-bottom: 35px !important;
         }
         
-        /* CENTRALIZAÇÃO ABSOLUTA DOS BOTÕES DO STREAMLIT */
+        /* FORÇA A CENTRALIZAÇÃO ABSOLUTA DOS BOTÕES DO STREAMLIT NA TELA */
         [data-testid="stVerticalBlockBorder"] > div {
             display: flex !important;
             flex-direction: column !important;
@@ -78,7 +78,7 @@ st.html("""
             margin: 0 auto !important;
         }
         
-        /* Estilização dos botões (Vermelho e Verde) */
+        /* Estilização dos botões limpos (Vermelho e Verde) */
         .stButton > button, .stLinkButton > a {
             border: none !important;
             padding: 12px 24px !important;
@@ -117,20 +117,17 @@ st.html("""
     </style>
 """)
 
-def buscar_frase_da_api():
+# 2. Função em Python que busca uma frase e autor REAL na internet em tempo real
+def buscar_frase_da_internet():
     try:
-        # Link de CDN corrigido para carregar o JSON diretamente sem erros de bloqueio
-        url = "https://jsdelivr.net"
-        resposta = requests.get(url, timeout=5)
-        
+        # Puxa uma frase totalmente aleatória da API global do DummyJSON
+        resposta = requests.get("https://dummyjson.com/quotes/random", timeout=5)
         if resposta.status_code == 200:
-            lista_de_frases = resposta.json()
-            item_sorteado = random.choice(lista_de_frases)
+            dados = resposta.json()
+            frase_ingles = dados["quote"]
+            autor = dados["author"]
             
-            frase_ingles = item_sorteado["message"]
-            autor = item_sorteado.get("author", "Sabedoria Popular")
-            
-            # Traduz a frase sorteada em tempo real
+            # Traduz a frase dinamicamente usando Python
             frase_traduzida = GoogleTranslator(source='en', target='pt').translate(frase_ingles)
             return frase_traduzida, autor
     except Exception:
@@ -139,15 +136,19 @@ def buscar_frase_da_api():
 
 st.markdown('<p class="titulo-principal">Para Lembrar</p>', unsafe_allow_html=True)
 
-frase_gerada, autor_original = buscar_frase_da_api()
+# Faz a chamada da API em tempo real a cada carregamento
+frase_gerada, autor_original = buscar_frase_da_internet()
 
 st.markdown(f'<p class="texto-dinamico">"{frase_gerada}"</p>', unsafe_allow_html=True)
 st.markdown(f'<p class="texto-autor">- {autor_original}</p>', unsafe_allow_html=True)
 
+# Botão de Nova Frase limpo (Apenas recarrega o script para buscar outra frase na internet)
 if st.button("Nova Frase"):
     st.rerun()
 
+# Configuração da mensagem de compartilhamento
 mensagem_formatada = f"*Para Lembrar:*\n\n\"{frase_gerada}\"\n- {autor_original}\n\n_Gerado via App Streamlit_"
 link_whatsapp = f"https://whatsapp.com{urllib.parse.quote(mensagem_formatada)}"
 
+# Botão do WhatsApp limpo
 st.link_button("Compartilhar no WhatsApp", link_whatsapp)
