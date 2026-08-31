@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cardápio Digital & Frase do Dia</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #151515;
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            background-color: #222;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+        }
+        h1 { color: #ff4757; margin-bottom: 20px; }
+        p #frase { font-style: italic; font-size: 1.2rem; min-height: 50px; display: block; }
+        p #autor { color: #ffa502; font-weight: bold; margin-top: 10px; display: block; }
+        button {
+            background-color: #ff4757;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 20px;
+        }
+        button:hover { background-color: #e84118; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>✨ Frase Motivacional</h1>
+        <p><span id="frase">Carregando frase inspiradora...</span></p>
+        <p><span id="autor"></span></p>
+        <button onclick="obterFrase()">Nova Frase</button>
+    </div>
+
+    <script>
+        async function obterFrase() {
+            const fraseElemento = document.getElementById('frase');
+            const autorElemento = document.getElementById('autor');
+            
+            fraseElemento.innerText = "Buscando nova frase...";
+            autorElemento.innerText = "";
+
+            try {
+                // Busca frase aleatória da API pública
+                const resposta = await fetch('https://allorigins.win' + encodeURIComponent('https://zenquotes.io'));
+                const dadosJSON = await resposta.json();
+                const dados = JSON.parse(dadosJSON.contents);
+                
+                const fraseIngles = dados[0].q;
+                const autor = dados[0].a;
+
+                // Traduz a frase usando uma API gratuita do MyMemory
+                const respostaTraducao = await fetch(`https://translated.net{encodeURIComponent(fraseIngles)}&langpair=en|pt`);
+                const dadosTraducao = await respostaTraducao.json();
+                const fraseTraduzida = dadosTraducao.responseData.translatedText;
+
+                fraseElemento.innerText = `"${fraseTraduzida}"`;
+                autorElemento.innerText = `- ${autor}`;
+            } catch (erro) {
+                fraseElemento.innerText = "Não foi possível carregar a frase. Tente novamente!";
+                console.error(erro);
+            }
+        }
+
+        // Carrega uma frase assim que abre a página
+        obterFrase();
+    </script>
+</body>
+</html>
