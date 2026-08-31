@@ -45,13 +45,29 @@ st.html("""
             text-align: center;
         }
         
-        /* FORÇA A CENTRALIZAÇÃO DOS BOTÕES DENTRO DA CAIXA */
+        /* ALINHAMENTO COMPLETO DA ESTRUTURA DO STREAMLIT */
+        [data-testid="stVerticalBlockBorder"] > div {
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: center !important;
+            justify-content: center !important;
+            text-align: center !important;
+        }
+
+        [data-testid="stElementContainer"] {
+            display: flex !important;
+            justify-content: center !important;
+            align-items: center !important;
+            width: 100% !important;
+        }
+
+        /* Centraliza os blocos dos botões */
         [data-testid="stButton"], [data-testid="stLinkButton"] {
             display: flex !important;
             justify-content: center !important;
             align-items: center !important;
             width: 100% !important;
-            text-align: center !important;
+            margin: 0 auto !important;
         }
         
         /* Estilização dos botões (Vermelho e Verde) */
@@ -62,9 +78,8 @@ st.html("""
             border-radius: 6px !important;
             font-weight: bold !important;
             transition: 0.3s !important;
-            width: 75% !important; /* Tamanho proporcional para não quebrar o texto */
-            min-width: 250px !important; /* Garante que o texto não quebre em duas linhas */
-            margin: 10px auto !important; /* Centraliza no meio exato da caixa */
+            width: 280px !important; /* Tamanho fixo perfeito para os dois botões */
+            margin: 5px auto !important; /* Força a centralização absoluta */
             display: inline-flex !important;
             justify-content: center !important;
             align-items: center !important;
@@ -97,8 +112,9 @@ st.html("""
 
 def buscar_frase_da_api():
     try:
+        # Gera um número aleatório para anexar ao link e quebrar a memória (cache) da API
         cache_buster = random.randint(1, 999999)
-        url_com_busto = f"https://adviceslip.com{cache_buster}"
+        url_com_busto = f"https://api.adviceslip.com/advice?t={cache_buster}"
         
         resposta = requests.get(url_com_busto, timeout=5)
         if resposta.status_code == 200:
@@ -109,14 +125,13 @@ def buscar_frase_da_api():
     except Exception:
         pass
     return "A persistência é o caminho do êxito."
-
 st.markdown('<p class="titulo-principal">Para Lembrar</p>', unsafe_allow_html=True)
 
 frase_gerada = buscar_frase_da_api()
 st.markdown(f'<p class="texto-dinamico">"{frase_gerada}"</p>', unsafe_allow_html=True)
 
 # Botão de Nova Frase
-if st.button("🔄 Nova Frase"):
+if st.button("Nova Frase"):
     st.rerun()
 
 mensagem_formatada = f"*Frase Motivacional do Dia:*\n\n\"{frase_gerada}\"\n\n_Gerado via App Streamlit_"
