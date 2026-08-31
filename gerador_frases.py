@@ -1,17 +1,18 @@
 import streamlit as st
 import requests
 from deep_translator import GoogleTranslator
-import pyjokes
 
-# 1. Configuração da página e injeção do visual CSS personalizado
+# 1. Configuração da página e injeção do visual idêntico à página web
 st.set_page_config(page_title="Frase do dia", page_icon="✨", layout="centered")
 
 st.html("""
     <style>
+        /* Fundo escuro do app */
         .stApp {
             background-color: #151515 !important;
             color: #ffffff !important;
         }
+        /* Caixa centralizada do projeto */
         .main-container {
             background-color: #222;
             padding: 30px;
@@ -21,6 +22,7 @@ st.html("""
             max-width: 500px;
             margin: 40px auto;
         }
+        /* Estilo do título principal */
         .titulo {
             color: #ff4757;
             font-size: 2.2rem;
@@ -28,6 +30,7 @@ st.html("""
             margin-bottom: 20px;
             text-align: center;
         }
+        /* Estilo da frase dinâmica */
         .texto-frase {
             font-style: italic;
             font-size: 1.4rem;
@@ -36,48 +39,37 @@ st.html("""
             margin-bottom: 15px;
             text-align: center;
         }
-        .texto-autor {
-            color: #ffa502;
-            font-weight: bold;
-            font-size: 1.1rem;
-            text-align: center;
-            margin-bottom: 25px;
-        }
+        /* Esconde cabeçalhos nativos do Streamlit */
         header, footer {visibility: hidden;}
     </style>
 """)
 
-# 2. Nova Lógica Segura para Gerar Frases/Pensamentos de Programação
-def obter_nova_frase():
+# 2. Função em Python que consulta a API externa em tempo real
+def buscar_frase_da_api():
     try:
-        # Tenta buscar na API original primeiro
-        resposta = requests.get("https://quotable.io", timeout=3)
+        # Consulta uma API pública e estável de conselhos/frases aleatórias
+        resposta = requests.get("https://adviceslip.com", timeout=5)
         if resposta.status_code == 200:
             dados = resposta.json()
-            frase_en = dados["content"]
-            autor = dados["author"]
-            frase_pt = GoogleTranslator(source='en', target='pt').translate(frase_en)
-            return frase_pt, autor
+            frase_ingles = dados["slip"]["advice"]
+            
+            # Traduz a frase dinamicamente usando Python
+            frase_traduzida = GoogleTranslator(source='en', target='pt').translate(frase_ingles)
+            return frase_traduzida
     except Exception:
-        pass # Se der erro na API externa, o Python pula direto para o plano B local abaixo
-        
-    try:
-        # Plano B: Gera um pensamento/piada de computação local em inglês e traduz instantaneamente
-        frase_computacao = pyjokes.get_joke()
-        frase_pt = GoogleTranslator(source='en', target='pt').translate(frase_computacao)
-        return frase_pt, "Pensamento Dev"
-    except Exception:
-        return "No meio da dificuldade encontra-se a oportunidade.", "Albert Einstein"
+        pass
+    # Caso sua internet ou a API falhem temporariamente, exibe uma frase reserva
+    return "A persistência é o caminho do êxito."
 
-# 3. Construção da interface visual estruturada
+# 3. Montagem da interface na tela
 st.markdown('<p class="titulo">✨ Frase Motivacional</p>', unsafe_allow_html=True)
 st.markdown('<div class="main-container">', unsafe_allow_html=True)
 
-frase, autor = obter_nova_frase()
+# Gera a frase dinamicamente puxando a API a cada atualização da página
+frase_dinamica = buscar_frase_da_api()
+st.markdown(f'<p class="texto-frase">"{frase_dinamica}"</p>', unsafe_allow_html=True)
 
-st.markdown(f'<p class="texto-frase">"{frase}"</p>', unsafe_allow_html=True)
-st.markdown(f'<p class="texto-autor">- {autor}</p>', unsafe_allow_html=True)
-
+# Botão nativo do Streamlit que recarrega o script e busca uma frase inédita na API
 if st.button("🔄 Nova Frase", use_container_width=True):
     st.rerun()
 
