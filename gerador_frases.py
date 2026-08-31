@@ -41,11 +41,20 @@ st.html("""
             font-size: 1.4rem;
             line-height: 1.6;
             color: #ffffff;
-            margin: 25px 0 35px 0 !important;
+            margin: 25px 0 10px 0 !important;
             text-align: center;
         }
+
+        /* Nome do Autor estilizado */
+        .texto-autor {
+            color: #ffa502;
+            font-weight: bold;
+            font-size: 1.1rem;
+            text-align: center;
+            margin-bottom: 35px !important;
+        }
         
-        /* ALINHAMENTO COMPLETO DA ESTRUTURA DO STREAMLIT */
+        /* FORÇA A CENTRALIZAÇÃO ABSOLUTA DOS BOTÕES */
         [data-testid="stVerticalBlockBorder"] > div {
             display: flex !important;
             flex-direction: column !important;
@@ -61,7 +70,6 @@ st.html("""
             width: 100% !important;
         }
 
-        /* Centraliza os blocos dos botões */
         [data-testid="stButton"], [data-testid="stLinkButton"] {
             display: flex !important;
             justify-content: center !important;
@@ -78,8 +86,8 @@ st.html("""
             border-radius: 6px !important;
             font-weight: bold !important;
             transition: 0.3s !important;
-            width: 280px !important; /* Tamanho fixo perfeito para os dois botões */
-            margin: 5px auto !important; /* Força a centralização absoluta */
+            width: 280px !important; /* Tamanho fixo para alinhar ambos */
+            margin: 5px auto !important;
             display: inline-flex !important;
             justify-content: center !important;
             align-items: center !important;
@@ -112,29 +120,42 @@ st.html("""
 
 def buscar_frase_da_api():
     try:
-        # Gera um número aleatório para anexar ao link e quebrar a memória (cache) da API
+        # Quebra o cache gerando um número aleatório
         cache_buster = random.randint(1, 999999)
-        url_com_busto = f"https://api.adviceslip.com/advice?t={cache_buster}"
+        # Usamos uma API estável que envia Frase + Autor
+        url = f"https://allorigins.win{urllib.parse.quote(f'https://quotable.io{cache_buster}')}"
         
-        resposta = requests.get(url_com_busto, timeout=5)
+        resposta = requests.get(url, timeout=5)
         if resposta.status_code == 200:
-            dados = resposta.json()
-            frase_ingles = dados["slip"]["advice"]
+            dados_proxy = resposta.json()
+            import json
+            dados = json.loads(dados_proxy["contents"])
+            
+            frase_ingles = dados["content"]
+            autor = dados["author"]
+            
+            # Traduz apenas a frase para o português
             frase_traduzida = GoogleTranslator(source='en', target='pt').translate(frase_ingles)
-            return frase_traduzida
+            return frase_traduzida, autor
     except Exception:
         pass
-    return "A persistência é o caminho do êxito."
+    # Caso falte internet na API externa, exibe uma estável padrão
+    return "A persistência é o caminho do êxito.", "Charles Chaplin"
+
 st.markdown('<p class="titulo-principal">Para Lembrar</p>', unsafe_allow_html=True)
 
-frase_gerada = buscar_frase_da_api()
+# Coleta a frase e o autor dinamicamente
+frase_gerada, autor_original = buscar_frase_da_api()
+
 st.markdown(f'<p class="texto-dinamico">"{frase_gerada}"</p>', unsafe_allow_html=True)
+st.markdown(f'<p class="texto-autor">- {autor_original}</p>', unsafe_allow_html=True)
 
 # Botão de Nova Frase
 if st.button("Nova Frase"):
     st.rerun()
 
-mensagem_formatada = f"*Frase Motivacional do Dia:*\n\n\"{frase_gerada}\"\n\n_Gerado via App Streamlit_"
+# Prepara a mensagem formatada contendo o autor para o WhatsApp
+mensagem_formatada = f"*Para Lembrar:*\n\n\"{frase_gerada}\"\n- {autor_original}\n\n_Gerado via App Streamlit_"
 link_whatsapp = f"https://whatsapp.com{urllib.parse.quote(mensagem_formatada)}"
 
 # Botão do WhatsApp
