@@ -146,9 +146,28 @@ st.markdown(f'<p class="texto-autor">- {autor_original}</p>', unsafe_allow_html=
 if st.button("Nova Frase"):
     st.rerun()
 
-# Configuração da mensagem de compartilhamento (Deixe como está)
-mensagem_formatada = f"*Para Lembrar:*\n\n\"{frase_gerada}\"\n- {autor_original}\n\n_Gerado via App Streamlit_"
+# Configuração da mensagem de compartilhamento (Mantenha como está)
+mensagem_formatada = f"*Para Lembrar:*\n\n\"{frase_gerada}\"\n- {autor_original}"
 link_whatsapp = f"https://whatsapp.com{urllib.parse.quote(mensagem_formatada)}"
 
-# SUBSTITUA A LINHA DO st.link_button POR ESTA LINHA ABAIXO:
-st.markdown(f'<a href="{link_whatsapp}" target="_blank" class="botao-wpp-nativo">Compartilhar no WhatsApp</a>', unsafe_allow_html=True)
+# SUBSTITUA A LINHA DO st.link_button POR ESTA NOVA LINHA ABAIXO:
+st.markdown(
+    f'<a href="{link_whatsapp}" target="_blank" style="'
+    f'background-color: #25D366; '
+    f'color: white; '
+    f'border: none; '
+    f'padding: 12px 24px; '
+    f'font-size: 1rem; '
+    f'border-radius: 6px; '
+    f'font-weight: bold; '
+    f'transition: 0.3s; '
+    f'width: 280px; '
+    f'margin: 5px auto; '
+    f'display: inline-flex; '
+    f'justify-content: center; '
+    f'align-items: center; '
+    f'text-align: center; '
+    f'text-decoration: none;'
+    f'">Compartilhar no WhatsApp</a>', 
+    unsafe_allow_html=True
+)
