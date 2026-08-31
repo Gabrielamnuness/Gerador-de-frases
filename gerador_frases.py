@@ -146,9 +146,9 @@ st.markdown(f'<p class="texto-autor">- {autor_original}</p>', unsafe_allow_html=
 if st.button("Nova Frase"):
     st.rerun()
 
-# Configuração da mensagem de compartilhamento
+# Configuração da mensagem de compartilhamento (Deixe como está)
 mensagem_formatada = f"*Para Lembrar:*\n\n\"{frase_gerada}\"\n- {autor_original}\n\n_Gerado via App Streamlit_"
 link_whatsapp = f"https://whatsapp.com{urllib.parse.quote(mensagem_formatada)}"
 
-# Botão do WhatsApp limpo
-st.link_button("Compartilhar no WhatsApp", link_whatsapp)
+# SUBSTITUA A LINHA DO st.link_button POR ESTA LINHA ABAIXO:
+st.markdown(f'<a href="{link_whatsapp}" target="_blank" class="botao-wpp-nativo">Compartilhar no WhatsApp</a>', unsafe_allow_html=True)
