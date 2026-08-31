@@ -9,7 +9,7 @@ def obter_frase():
         frase = response.json() ["content"]
         frase = traduzir_texto(frase)
         autor = response.json() ["author"]
-        return f'"{frase}" - {autor}'
+        return f'{frase} - {autor}'
     else:
         print("Erro ao obter frase", "Desconhecido")
         return None
