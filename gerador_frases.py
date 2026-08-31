@@ -54,7 +54,7 @@ st.html("""
             margin-bottom: 35px !important;
         }
         
-        /* FORÇA A CENTRALIZAÇÃO ABSOLUTA DOS BOTÕES */
+        /* CENTRALIZAÇÃO ABSOLUTA DOS BOTÕES DO STREAMLIT */
         [data-testid="stVerticalBlockBorder"] > div {
             display: flex !important;
             flex-direction: column !important;
@@ -86,7 +86,7 @@ st.html("""
             border-radius: 6px !important;
             font-weight: bold !important;
             transition: 0.3s !important;
-            width: 280px !important; /* Tamanho fixo para alinhar ambos */
+            width: 280px !important; /* Mantém os dois botões com largura idêntica */
             margin: 5px auto !important;
             display: inline-flex !important;
             justify-content: center !important;
@@ -120,43 +120,38 @@ st.html("""
 
 def buscar_frase_da_api():
     try:
-        # Quebra o cache gerando um número aleatório
-        cache_buster = random.randint(1, 999999)
-        # Usamos uma API estável que envia Frase + Autor
-        url = f"https://allorigins.win{urllib.parse.quote(f'https://quotable.io{cache_buster}')}"
-        
-        resposta = requests.get(url, timeout=5)
+        # Usamos uma API alternativa super estável baseada em JSON sem bloqueio de nuvem
+        resposta = requests.get("https://githubusercontent.com", timeout=5)
         if resposta.status_code == 200:
-            dados_proxy = resposta.json()
-            import json
-            dados = json.loads(dados_proxy["contents"])
+            lista_de_frases = resposta.json()
+            # Sorteia uma das frases direto na memória do servidor
+            item_sorteado = random.choice(lista_de_frases)
             
-            frase_ingles = dados["content"]
-            autor = dados["author"]
+            frase_ingles = item_sorteado["message"]
+            # Caso a API não tenha autor listado, criamos um padrão elegante
+            autor = item_sorteado.get("author", "Sabedoria Popular")
             
-            # Traduz apenas a frase para o português
+            # Traduz a frase de inglês para português via Python
             frase_traduzida = GoogleTranslator(source='en', target='pt').translate(frase_ingles)
             return frase_traduzida, autor
     except Exception:
         pass
-    # Caso falte internet na API externa, exibe uma estável padrão
-    return "A persistência é o caminho do êxito.", "Charles Chaplin"
+    return "No meio da dificuldade encontra-se a oportunidade.", "Albert Einstein"
 
 st.markdown('<p class="titulo-principal">Para Lembrar</p>', unsafe_allow_html=True)
 
-# Coleta a frase e o autor dinamicamente
+# Coleta a nova frase gerada e o autor de forma 100% dinâmica
 frase_gerada, autor_original = buscar_frase_da_api()
 
 st.markdown(f'<p class="texto-dinamico">"{frase_gerada}"</p>', unsafe_allow_html=True)
 st.markdown(f'<p class="texto-autor">- {autor_original}</p>', unsafe_allow_html=True)
 
-# Botão de Nova Frase
+# Botão de Nova Frase (recarrega a página e força um novo sorteio na API)
 if st.button("Nova Frase"):
     st.rerun()
 
-# Prepara a mensagem formatada contendo o autor para o WhatsApp
+# Prepara a mensagem formatada para o WhatsApp
 mensagem_formatada = f"*Para Lembrar:*\n\n\"{frase_gerada}\"\n- {autor_original}\n\n_Gerado via App Streamlit_"
 link_whatsapp = f"https://whatsapp.com{urllib.parse.quote(mensagem_formatada)}"
 
-# Botão do WhatsApp
 st.link_button("Compartilhar no WhatsApp", link_whatsapp)
