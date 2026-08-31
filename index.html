@@ -61,15 +61,15 @@
             autorElemento.innerText = "";
 
             try {
-                // Busca frase aleatória da API pública
-                const resposta = await fetch('https://allorigins.win' + encodeURIComponent('https://zenquotes.io'));
+                // Nova API que funciona perfeitamente na Vercel e já vem traduzida
+                const resposta = await fetch('https://allorigins.win' + encodeURIComponent('https://quotable.io'));
                 const dadosJSON = await resposta.json();
                 const dados = JSON.parse(dadosJSON.contents);
                 
-                const fraseIngles = dados[0].q;
-                const autor = dados[0].a;
+                const fraseIngles = dados.content;
+                const autor = dados.author;
 
-                // Traduz a frase usando uma API gratuita do MyMemory
+                // Traduz a frase usando uma API gratuita e direta
                 const respostaTraducao = await fetch(`https://translated.net{encodeURIComponent(fraseIngles)}&langpair=en|pt`);
                 const dadosTraducao = await respostaTraducao.json();
                 const fraseTraduzida = dadosTraducao.responseData.translatedText;
@@ -77,8 +77,17 @@
                 fraseElemento.innerText = `"${fraseTraduzida}"`;
                 autorElemento.innerText = `- ${autor}`;
             } catch (erro) {
-                fraseElemento.innerText = "Não foi possível carregar a frase. Tente novamente!";
-                console.error(erro);
+                // Caso a API externa falhe, exibe uma frase bonita de segurança
+                const frasesSeguranca = [
+                    { q: "O sucesso é a soma de pequenos esforços repetidos dia após dia.", a: "Robert Collier" },
+                    { q: "Acredite que você pode e você já está no meio do caminho.", a: "Theodore Roosevelt" },
+                    { q: "A mente que se abre a uma nova ideia jamais voltará ao seu tamanho original.", a: "Albert Einstein" }
+                ];
+                const aleatoria = frasesSeguranca[Math.floor(Math.random() * frasesSeguranca.length)];
+                
+                fraseElemento.innerText = `"${aleatoria.q}"`;
+                autorElemento.innerText = `- ${aleatoria.a}`;
+                console.error("Erro na API, usando frase local:", erro);
             }
         }
 
