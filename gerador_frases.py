@@ -1,76 +1,105 @@
 import streamlit as st
 import requests
 from deep_translator import GoogleTranslator
+import urllib.parse
 
-# 1. Configuração da página e injeção do visual idêntico à página web
+# 1. Configuração da página e estilização dos elementos nativos do Streamlit
 st.set_page_config(page_title="Frase do dia", page_icon="✨", layout="centered")
 
 st.html("""
     <style>
-        /* Fundo escuro do app */
+        /* Fundo escuro total do aplicativo */
         .stApp {
             background-color: #151515 !important;
             color: #ffffff !important;
         }
-        /* Caixa centralizada do projeto */
-        .main-container {
-            background-color: #222;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-            text-align: center;
-            max-width: 500px;
-            margin: 40px auto;
+        /* Centralização e estilo do bloco principal de conteúdo */
+        .stMainBlockContainer {
+            max-width: 500px !important;
+            padding: 40px 20px !important;
+            background-color: #222 !important;
+            border-radius: 12px !important;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5) !important;
+            margin: 60px auto !important;
+            text-align: center !important;
         }
-        /* Estilo do título principal */
-        .titulo {
+        /* Estilização do título principal */
+        .titulo-principal {
             color: #ff4757;
             font-size: 2.2rem;
             font-weight: bold;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
             text-align: center;
+            font-family: 'Segoe UI', sans-serif;
         }
-        /* Estilo da frase dinâmica */
-        .texto-frase {
+        /* Estilização da frase motivacional */
+        .texto-dinamico {
             font-style: italic;
             font-size: 1.4rem;
             line-height: 1.6;
             color: #ffffff;
-            margin-bottom: 15px;
+            margin: 20px 0 !important;
             text-align: center;
         }
-        /* Esconde cabeçalhos nativos do Streamlit */
-        header, footer {visibility: hidden;}
+        /* Força todos os botões do Streamlit a ficarem bonitos */
+        .stButton > button {
+            border: none !important;
+            padding: 12px 24px !important;
+            font-size: 1rem !important;
+            border-radius: 6px !important;
+            font-weight: bold !important;
+            transition: 0.3s !important;
+            width: 100% !important;
+            margin-top: 10px !important;
+        }
+        /* Botão "Nova Frase" (Vermelho) */
+        .stButton:nth-of-type(1) > button {
+            background-color: #ff4757 !important;
+            color: white !important;
+        }
+        .stButton:nth-of-type(1) > button:hover {
+            background-color: #e84118 !important;
+        }
+        /* Botão "Compartilhar" (Verde do WhatsApp) */
+        .stButton:nth-of-type(2) > button {
+            background-color: #25D366 !important;
+            color: white !important;
+        }
+        .stButton:nth-of-type(2) > button:hover {
+            background-color: #128C7E !important;
+        }
+        /* Oculta menus e rodapés padrões do Streamlit */
+        header, footer, [data-testid="stHeader"] { visibility: hidden !important; }
     </style>
 """)
 
-# 2. Função em Python que consulta a API externa em tempo real
+# 2. Função em Python para buscar frases da API em tempo real
 def buscar_frase_da_api():
     try:
-        # Consulta uma API pública e estável de conselhos/frases aleatórias
         resposta = requests.get("https://adviceslip.com", timeout=5)
         if resposta.status_code == 200:
             dados = resposta.json()
             frase_ingles = dados["slip"]["advice"]
-            
-            # Traduz a frase dinamicamente usando Python
             frase_traduzida = GoogleTranslator(source='en', target='pt').translate(frase_ingles)
             return frase_traduzida
     except Exception:
         pass
-    # Caso sua internet ou a API falhem temporariamente, exibe uma frase reserva
     return "A persistência é o caminho do êxito."
 
-# 3. Montagem da interface na tela
-st.markdown('<p class="titulo">✨ Frase Motivacional</p>', unsafe_allow_html=True)
-st.markdown('<div class="main-container">', unsafe_allow_html=True)
+# 3. Construção estruturada da interface
+st.markdown('<p class="titulo-principal">Para lembrar</p>', unsafe_allow_html=True)
 
-# Gera a frase dinamicamente puxando a API a cada atualização da página
-frase_dinamica = buscar_frase_da_api()
-st.markdown(f'<p class="texto-frase">"{frase_dinamica}"</p>', unsafe_allow_html=True)
+# Puxa a API em tempo real para gerar uma nova frase a cada atualização
+frase_gerada = buscar_frase_da_api()
+st.markdown(f'<p class="texto-dinamico">"{frase_gerada}"</p>', unsafe_allow_html=True)
 
-# Botão nativo do Streamlit que recarrega o script e busca uma frase inédita na API
-if st.button("🔄 Nova Frase", use_container_width=True):
+# Botão 1: Recarrega a página e muda a frase automaticamente
+if st.button("🔄 Nova Frase"):
     st.rerun()
 
-st.markdown('</div>', unsafe_allow_html=True)
+# Criação dinâmica do link de compartilhamento para o WhatsApp
+mensagem_formatada = f"*Frase Motivacional do Dia:*\n\n\"{frase_gerada}\"\n\n_Gerado via App Streamlit_"
+link_whatsapp = f"https://whatsapp.com{urllib.parse.quote(mensagem_formatada)}"
+
+# Botão 2: Redireciona o usuário para o WhatsApp com a frase pronta
+st.link_button(" Compartilhar no WhatsApp", link_whatsapp)
