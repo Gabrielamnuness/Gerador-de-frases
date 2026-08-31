@@ -4,7 +4,7 @@ from deep_translator import GoogleTranslator
 import urllib.parse
 import random
 
-st.set_page_config(page_title="Frase do dia", page_icon="✨", layout="centered")
+st.set_page_config(page_title="Frase do dia", layout="centered")
 
 st.html("""
     <style>
@@ -86,7 +86,7 @@ st.html("""
             border-radius: 6px !important;
             font-weight: bold !important;
             transition: 0.3s !important;
-            width: 280px !important; /* Mantém os dois botões com largura idêntica */
+            width: 280px !important; 
             margin: 5px auto !important;
             display: inline-flex !important;
             justify-content: center !important;
@@ -113,44 +113,40 @@ st.html("""
             background-color: #128C7E !important;
         }
         
-        /* Oculta elementos padrões do Streamlit */
         header, footer, [data-testid="stHeader"] { visibility: hidden !important; }
     </style>
 """)
 
 def buscar_frase_da_api():
     try:
-        # Usamos uma API alternativa super estável baseada em JSON sem bloqueio de nuvem
-        resposta = requests.get("https://githubusercontent.com", timeout=5)
+        # Link de CDN corrigido para carregar o JSON diretamente sem erros de bloqueio
+        url = "https://jsdelivr.net"
+        resposta = requests.get(url, timeout=5)
+        
         if resposta.status_code == 200:
             lista_de_frases = resposta.json()
-            # Sorteia uma das frases direto na memória do servidor
             item_sorteado = random.choice(lista_de_frases)
             
             frase_ingles = item_sorteado["message"]
-            # Caso a API não tenha autor listado, criamos um padrão elegante
             autor = item_sorteado.get("author", "Sabedoria Popular")
             
-            # Traduz a frase de inglês para português via Python
+            # Traduz a frase sorteada em tempo real
             frase_traduzida = GoogleTranslator(source='en', target='pt').translate(frase_ingles)
             return frase_traduzida, autor
     except Exception:
         pass
-    return "No meio da dificuldade encontra-se a oportunidade.", "Albert Einstein"
+    return "A persistência é o caminho do êxito.", "Charles Chaplin"
 
 st.markdown('<p class="titulo-principal">Para Lembrar</p>', unsafe_allow_html=True)
 
-# Coleta a nova frase gerada e o autor de forma 100% dinâmica
 frase_gerada, autor_original = buscar_frase_da_api()
 
 st.markdown(f'<p class="texto-dinamico">"{frase_gerada}"</p>', unsafe_allow_html=True)
 st.markdown(f'<p class="texto-autor">- {autor_original}</p>', unsafe_allow_html=True)
 
-# Botão de Nova Frase (recarrega a página e força um novo sorteio na API)
 if st.button("Nova Frase"):
     st.rerun()
 
-# Prepara a mensagem formatada para o WhatsApp
 mensagem_formatada = f"*Para Lembrar:*\n\n\"{frase_gerada}\"\n- {autor_original}\n\n_Gerado via App Streamlit_"
 link_whatsapp = f"https://whatsapp.com{urllib.parse.quote(mensagem_formatada)}"
 
