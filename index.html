@@ -29,27 +29,55 @@
         h1 { color: #ff4757; margin-bottom: 20px; }
         p #frase { font-style: italic; font-size: 1.2rem; min-height: 50px; display: block; }
         p #autor { color: #ffa502; font-weight: bold; margin-top: 10px; display: block; }
+        
+        .botoes-container {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
         button {
-            background-color: #ff4757;
-            color: white;
             border: none;
             padding: 12px 24px;
             font-size: 1rem;
             border-radius: 6px;
             cursor: pointer;
             transition: 0.3s;
-            margin-top: 20px;
+            font-weight: bold;
         }
-        button:hover { background-color: #e84118; }
+        
+        .btn-nova {
+            background-color: #ff4757;
+            color: white;
+        }
+        .btn-nova:hover { background-color: #e84118; }
+
+        .btn-wpp {
+            background-color: #25D366;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-wpp:hover { background-color: #128C7E; }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <h1> To remember </h1>
+        <!-- Aqui foi alterado para remover o Cardápio Digital -->
+        <h1>To remember</h1>
         <p><span id="frase">Carregando frase ...</span></p>
         <p><span id="autor"></span></p>
-        <button onclick="obterFrase()">Nova Frase</button>
+        
+        <div class="botoes-container">
+            <button class="btn-nova" onclick="obterFrase()">Nova Frase</button>
+            <button class="btn-wpp" onclick="compartilharNoWhatsApp()">
+                Compartilhar no WhatsApp
+            </button>
+        </div>
     </div>
 
     <script>
@@ -61,7 +89,6 @@
             autorElemento.innerText = "";
 
             try {
-                // Nova API que funciona perfeitamente na Vercel e já vem traduzida
                 const resposta = await fetch('https://allorigins.win' + encodeURIComponent('https://quotable.io'));
                 const dadosJSON = await resposta.json();
                 const dados = JSON.parse(dadosJSON.contents);
@@ -69,7 +96,6 @@
                 const fraseIngles = dados.content;
                 const autor = dados.author;
 
-                // Traduz a frase usando uma API gratuita e direta
                 const respostaTraducao = await fetch(`https://translated.net{encodeURIComponent(fraseIngles)}&langpair=en|pt`);
                 const dadosTraducao = await respostaTraducao.json();
                 const fraseTraduzida = dadosTraducao.responseData.translatedText;
@@ -77,9 +103,8 @@
                 fraseElemento.innerText = `"${fraseTraduzida}"`;
                 autorElemento.innerText = `- ${autor}`;
             } catch (erro) {
-                // Caso a API externa falhe, exibe uma frase bonita de segurança
                 const frasesSeguranca = [
-                    { q: "O sucesso é a soma de pequenos esforços repetidos dia após dia.", a: "Robert Collier" },
+                    { q: "O success é a soma de pequenos esforços repetidos dia após dia.", a: "Robert Collier" },
                     { q: "Acredite que você pode e você já está no meio do caminho.", a: "Theodore Roosevelt" },
                     { q: "A mente que se abre a uma nova ideia jamais voltará ao seu tamanho original.", a: "Albert Einstein" }
                 ];
@@ -91,7 +116,20 @@
             }
         }
 
-        // Carrega uma frase assim que abre a página
+        function compartilharNoWhatsApp() {
+            const frase = document.getElementById('frase').innerText;
+            const autor = document.getElementById('autor').innerText;
+            
+            if (frase === "Buscando nova frase..." || frase === "Carregando frase inspiradora...") {
+                alert("Aguarde a frase carregar para compartilhar!");
+                return;
+            }
+
+            const textoMensagem = `*Frase do Dia:*\n\n${frase}\n${autor}\n\n_Enviado através do Gerador de Frases_`;
+            const urlWhatsApp = `https://whatsapp.com{encodeURIComponent(textoMensagem)}`;
+            window.open(urlWhatsApp, '_blank');
+        }
+
         obterFrase();
     </script>
 </body>
